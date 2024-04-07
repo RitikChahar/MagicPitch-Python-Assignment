@@ -33,26 +33,26 @@ def register(request):
                     return JsonResponse({
                         "success":False,
                         "message":"There is an issue with the referral system.",
-                    })
+                    }, status = 400)
             if user_form.is_valid():
                 user_form.save()
                 return JsonResponse ({
                     "success":True,
                     "message":"Registration Successful.",
                     "user_id":user_id
-                    })
+                    }, status = 201)
             else:
                 return JsonResponse({
                     "success":False,
                     "message":"Form is not valid, check if any field is missing."
-                })
+                }, status = 422)
         else:
             return JsonResponse({
                 "success":False,
                 "message":"Email already exists, try to register with a new email."
-            })
+            }, status = 409)
     else:
-        return HttpResponse("Method Not Allowed")
+        return HttpResponse("Method Not Allowed", status = 405)
 
 @csrf_exempt
 def login(request):
@@ -69,19 +69,19 @@ def login(request):
                     "success":True,
                     "message":"Login Successful.",
                     "token":token
-                    })
+                    }, status = 201)
             else:
                 return JsonResponse ({
                     "success":False,
                     "message":"Wrong Password",
-                    })
+                    }, status = 401)
         else:
             return JsonResponse ({
                 "success":False,
                 "message":"User does not exist.",
-                })
+                }, status = 401)
     else:
-        return HttpResponse("Method Not Allowed")
+        return HttpResponse("Method Not Allowed", status = 405)
     
 @csrf_exempt 
 def details(request):
@@ -103,19 +103,19 @@ def details(request):
                     "success":True,
                     "message":"Authentication Successful.",
                     "data": output
-                })
+                }, status = 200)
             else:
                 return JsonResponse({
                     "success":False,
                     "message":"Authentication Failed. Wrong Token."
-                })
+                }, status = 401)
         else:
             return JsonResponse({
                 "success":False,
                 "message":"Authentication Failed. Token Missing."
-            })
+            }, status = 403)
     else:
-        return HttpResponse("Method Not Allowed")
+        return HttpResponse("Method Not Allowed", status = 405)
 
 @csrf_exempt 
 def refer(request):
@@ -144,16 +144,16 @@ def refer(request):
                     "success":True,
                     "message":"Authentication Successful.",
                     "data": output
-                })
+                }, status = 200)
             else:
                 return JsonResponse({
                     "success":False,
                     "message":"Authentication Failed. Wrong Token."
-                })
+                }, status = 401)
         else:
             return JsonResponse({
                 "success":False,
                 "message":"Authentication Failed. Token Missing."
-            })
+            }, status = 403)
     else:
-        return HttpResponse("Method Not Allowed")
+        return HttpResponse("Method Not Allowed", status = 405)
