@@ -1,7 +1,7 @@
 # MagicPitch-Python-Assignment
 The objective of this project is to build a referral system API that allows users to register, view their details, and view their referrals.
 ## Referral System API Usage
-#### For detailed API usage, explore our Postman collection [here]([link_to_postman_collection](https://documenter.getpostman.com/view/27523601/2sA35MyJi8)).
+#### For detailed API usage, explore our Postman collection [here](https://documenter.getpostman.com/view/27523601/2sA35MyJi8).
 ### Base URL
 ```
 http://127.0.0.1:8000
