@@ -1,7 +1,6 @@
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse, HttpResponse
-from django.contrib.auth import authenticate
-from django.contrib.auth.tokens import default_token_generator
+from django.core.paginator import Paginator, EmptyPage
 from .forms import UserForm, ReferralForm
 from .models import User, Referral
 from .helper import generate_unique_hash, hash_password, verify_password, generate_jwt_token, verify_jwt_token
@@ -85,9 +84,10 @@ def login(request):
         return HttpResponse("Method Not Allowed")
     
 @csrf_exempt 
-def details(request, user_id):
+def details(request):
     if request.method == 'GET':
         token = request.headers.get('Authorization')
+        user_id = request.GET.get('user_id')
         token = token.split(" ")[1]
         if token:
             user = verify_jwt_token(token)
@@ -118,16 +118,24 @@ def details(request, user_id):
         return HttpResponse("Method Not Allowed")
 
 @csrf_exempt 
-def refer(request, referral_code):
+def refer(request):
     if request.method == 'GET':
         token = request.headers.get('Authorization')
+        page_number = int(request.GET.get('page', 1))
+        items_per_page = 20
+        referral_code = request.GET.get('referral_code')
         token = token.split(" ")[1]
         if token:
             user = verify_jwt_token(token)
             if user:
                 user_details = Referral.objects.filter(referred_by = referral_code)
+                paginator = Paginator(user_details, items_per_page)
+                try:
+                    page_obj = paginator.page(page_number)
+                except EmptyPage:
+                    page_obj = paginator.page(paginator.num_pages)
                 output = []
-                for record in user_details:
+                for record in page_obj:
                     output.append({
                         "user_id": record.referred_user,
                         "registration_timestamp": record.created_at
