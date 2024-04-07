@@ -3,7 +3,7 @@ from django.http import JsonResponse, HttpResponse
 from django.contrib.auth import authenticate
 from django.contrib.auth.tokens import default_token_generator
 from .forms import UserForm, ReferralForm
-from .models import User
+from .models import User, Referral
 from .helper import generate_unique_hash, hash_password, verify_password, generate_jwt_token, verify_jwt_token
 import json
 
@@ -65,7 +65,7 @@ def login(request):
             user = User.objects.get(email = email)
             hashed_password = user.password
             if(verify_password(pwd, hashed_password)):
-                token = generate_jwt_token(user)
+                token = generate_jwt_token(user.email)
                 return JsonResponse ({
                     "success":True,
                     "message":"Login Successful.",
@@ -81,5 +81,68 @@ def login(request):
                 "success":False,
                 "message":"User does not exist.",
                 })
+    else:
+        return HttpResponse("Method Not Allowed")
+    
+@csrf_exempt 
+def details(request, user_id):
+    if request.method == 'GET':
+        token = request.headers.get('Authorization')
+        token = token.split(" ")[1]
+        if token:
+            user = verify_jwt_token(token)
+            if user:
+                user_details = User.objects.get(referral_code = user_id)
+                output = {
+                    "name": user_details.name,
+                    "email": user_details.email,
+                    "referral_code": user_details.referral_code,
+                    "registration_time": user_details.created_at,
+                }
+                return JsonResponse({
+                    "success":True,
+                    "message":"Authentication Successful.",
+                    "data": output
+                })
+            else:
+                return JsonResponse({
+                    "success":False,
+                    "message":"Authentication Failed. Wrong Token."
+                })
+        else:
+            return JsonResponse({
+                "success":False,
+                "message":"Authentication Failed. Token Missing."
+            })
+    else:
+        return HttpResponse("Method Not Allowed")
+
+@csrf_exempt 
+def refer(request, referral_code):
+    if request.method == 'GET':
+        token = request.headers.get('Authorization')
+        token = token.split(" ")[1]
+        if token:
+            user = verify_jwt_token(token)
+            if user:
+                user_details = Referral.objects.filter(referred_by = referral_code)
+                output = []
+                for record in user_details:
+                    output.append(record.referred_user)
+                return JsonResponse({
+                    "success":True,
+                    "message":"Authentication Successful.",
+                    "data": output
+                })
+            else:
+                return JsonResponse({
+                    "success":False,
+                    "message":"Authentication Failed. Wrong Token."
+                })
+        else:
+            return JsonResponse({
+                "success":False,
+                "message":"Authentication Failed. Token Missing."
+            })
     else:
         return HttpResponse("Method Not Allowed")
