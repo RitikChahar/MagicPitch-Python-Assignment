@@ -128,7 +128,10 @@ def refer(request, referral_code):
                 user_details = Referral.objects.filter(referred_by = referral_code)
                 output = []
                 for record in user_details:
-                    output.append(record.referred_user)
+                    output.append({
+                        "user_id": record.referred_user,
+                        "registration_timestamp": record.created_at
+                    })
                 return JsonResponse({
                     "success":True,
                     "message":"Authentication Successful.",
